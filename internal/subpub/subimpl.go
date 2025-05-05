@@ -2,6 +2,10 @@ package subpub
 
 import "sync"
 
+const (
+	GLOC_SUB = "internal/subpub/subimpl.go/"
+)
+
 type subscription struct {
 	subject string
 	once    sync.Once
@@ -10,6 +14,9 @@ type subscription struct {
 }
 
 func (s *subscription) Unsubscribe() {
+	loc := GLOC_SUB + "Unsubscribe()"
+	_ = loc
+
 	// ? THINK : O(n) is bad :(
 	s.once.Do(func() {
 		s.sp.mu.Lock()

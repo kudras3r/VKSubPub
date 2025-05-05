@@ -1,5 +1,8 @@
 package subpub
 
+// needed for testing no-export things in /tests
+// look at /tests/subpub_test.go
+
 import (
 	"sync"
 	"testing"
@@ -7,7 +10,6 @@ import (
 )
 
 func TestSubPubExtraQueueOrder(t *testing.T, received []int, msgs []interface{}) {
-
 	var mu sync.Mutex
 
 	handler := func(msg interface{}) {
@@ -23,7 +25,7 @@ func TestSubPubExtraQueueOrder(t *testing.T, received []int, msgs []interface{})
 		t.Fatalf("Subscribe failed: %v", err)
 	}
 
-	msgsLen := QSIZE + 30
+	msgsLen := conf.SubQSize + 30
 	for i := 0; i < msgsLen; i++ {
 		msgs = append(msgs, i)
 	}

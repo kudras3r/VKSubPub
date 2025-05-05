@@ -24,15 +24,8 @@ import (
 	"sync"
 )
 
-// ! TODO : in future set as config values
 const (
-	GLOC = "internal/subpub/subimpl.go/" // for logging
-
-	QSIZE          = 8
-	MAX_EXTRA_SIZE = 4056 // if there - sub is REALLY slow
-
-	DEFAULT_SUBS_CAP  = 64
-	DEFAULT_EXTRA_CAP = 16
+	GLOC_SP = "internal/subpub/spimpl.go/" // for logging
 )
 
 type subscriber struct {
@@ -64,7 +57,7 @@ func (s *subscriber) drainExtra() {
 	s.exMu.Lock()
 	defer s.exMu.Unlock()
 
-	if len(s.extra) > MAX_EXTRA_SIZE {
+	if len(s.extra) > conf.MaxExSize {
 		// ? THINK : what we gonna do
 	}
 
@@ -80,7 +73,7 @@ func (s *subscriber) drainExtra() {
 
 // Subscribe creates an asynchronous queue subscriber on the given subject.
 func (s *subPub) Subscribe(subject string, cb MessageHandler) (Subscription, error) {
-	loc := GLOC + "subPub.Subscribe()"
+	loc := GLOC_SP + "subPub.Subscribe()"
 
 	if emptySubject(subject) {
 		return nil, ErrEmptySubject(loc)
@@ -93,15 +86,15 @@ func (s *subPub) Subscribe(subject string, cb MessageHandler) (Subscription, err
 	defer s.mu.Unlock()
 
 	if _, ok := s.subcrs[subject]; !ok {
-		s.subcrs[subject] = make([]*subscriber, 0, DEFAULT_SUBS_CAP)
+		s.subcrs[subject] = make([]*subscriber, 0, conf.DefaultSubsCap)
 	}
 
 	nsub := &subscriber{
-		ch:   make(chan interface{}, QSIZE),
+		ch:   make(chan interface{}, conf.SubQSize),
 		hl:   cb,
 		stop: make(chan struct{}),
 
-		extra: make([]interface{}, 0, DEFAULT_EXTRA_CAP),
+		extra: make([]interface{}, 0, conf.DefaultExCap),
 	}
 	s.subcrs[subject] = append(s.subcrs[subject], nsub)
 
@@ -130,7 +123,7 @@ func (s *subPub) Subscribe(subject string, cb MessageHandler) (Subscription, err
 }
 
 func (s *subPub) Publish(subject string, msg interface{}) error {
-	loc := GLOC + "subPub.Publish()"
+	loc := GLOC_SP + "subPub.Publish()"
 
 	if emptySubject(subject) {
 		return ErrEmptySubject(loc)
@@ -160,7 +153,7 @@ func (s *subPub) Publish(subject string, msg interface{}) error {
 }
 
 func (s *subPub) Close(ctx context.Context) error {
-	loc := GLOC + "Close()"
+	loc := GLOC_SP + "Close()"
 
 	_ = loc
 

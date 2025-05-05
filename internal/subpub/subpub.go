@@ -2,7 +2,11 @@ package subpub
 
 import (
 	"context"
+
+	"github.com/kudras3r/VKSubPub/pkg/config"
 )
+
+var conf *config.SPConf
 
 // MessageHandler is a callback function that processes messages delivered to subscribers.
 type MessageHandler func(msg interface{})
@@ -28,4 +32,8 @@ func NewSubPub() SubPub {
 	return &subPub{
 		subcrs: make(map[string][]*subscriber),
 	}
+}
+
+func SetConf(c *config.SPConf) {
+	conf = c
 }
