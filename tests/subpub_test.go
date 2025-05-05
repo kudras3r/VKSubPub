@@ -79,6 +79,7 @@ func TestSubscribeAndPublish(t *testing.T) {
 	wg.Wait()
 }
 
+// ! : check internal/subpub/spimpl.go
 // func TestHandlerPanicRecovery(t *testing.T) {
 // 	sp := subpub.NewSubPub()
 // 	count := 0
@@ -231,24 +232,73 @@ func TestMultipleUnsubscribe(t *testing.T) {
 	}
 }
 
-func TestClose(t *testing.T) {
-	return
-
+func TestCloseGraceful(t *testing.T) {
 	sp := subpub.NewSubPub()
 
-	_, err := sp.Subscribe("close", func(msg interface{}) {
+	var mu sync.Mutex
+	called := 0
 
+	_, err := sp.Subscribe("test", func(msg interface{}) {
+		mu.Lock()
+		called++
+		mu.Unlock()
 	})
 	if err != nil {
-		t.Fatalf("Failed to subscribe: %v", err)
+		t.Fatalf("Subscribe failed: %v", err)
 	}
+
+	err = sp.Publish("test", "message")
+	if err != nil {
+		t.Fatalf("Publish failed: %v", err)
+	}
+
+	time.Sleep(50 * time.Millisecond)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
 	err = sp.Close(ctx)
 	if err != nil {
-		t.Fatalf("Failed to close: %v", err)
+		t.Fatalf("Close should complete successfully, got error: %v", err)
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+	if called != 1 {
+		t.Errorf("Expected handler to be called once, got %d", called)
+	}
+}
+
+func TestCloseContextCancelled(t *testing.T) {
+	sp := subpub.NewSubPub()
+
+	blocker := make(chan struct{})
+
+	_, err := sp.Subscribe("test", func(msg interface{}) {
+		<-blocker
+	})
+	if err != nil {
+		t.Fatalf("Subscribe failed: %v", err)
+	}
+
+	err = sp.Publish("test", "msg")
+	if err != nil {
+		t.Fatalf("Publish failed: %v", err)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	start := time.Now()
+	err = sp.Close(ctx)
+	duration := time.Since(start)
+
+	if err == nil {
+		t.Fatalf("Expected Close to return error due to cancelled context")
+	}
+
+	if duration > 200*time.Millisecond {
+		t.Errorf("Close took too long despite cancelled context: %v", duration)
 	}
 }
 

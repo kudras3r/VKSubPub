@@ -7,6 +7,7 @@ import (
 )
 
 func TestSubPubExtraQueueOrder(t *testing.T, received []int, msgs []interface{}) {
+
 	var mu sync.Mutex
 
 	handler := func(msg interface{}) {

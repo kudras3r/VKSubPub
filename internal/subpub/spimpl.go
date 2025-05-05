@@ -48,6 +48,8 @@ type subscriber struct {
 type subPub struct {
 	mu     sync.RWMutex
 	subcrs map[string][]*subscriber
+
+	wg sync.WaitGroup
 }
 
 func emptySubject(subject string) bool {
@@ -103,8 +105,11 @@ func (s *subPub) Subscribe(subject string, cb MessageHandler) (Subscription, err
 	}
 	s.subcrs[subject] = append(s.subcrs[subject], nsub)
 
+	s.wg.Add(1)
+
 	// listen
 	go func() {
+		defer s.wg.Done()
 		for {
 			select {
 			case msg := <-nsub.ch:
@@ -155,5 +160,28 @@ func (s *subPub) Publish(subject string, msg interface{}) error {
 }
 
 func (s *subPub) Close(ctx context.Context) error {
-	panic("asd")
+	loc := GLOC + "Close()"
+
+	_ = loc
+
+	s.mu.Lock()
+	for _, subs := range s.subcrs {
+		for _, sub := range subs {
+			close(sub.stop)
+		}
+	}
+	s.mu.Unlock()
+
+	done := make(chan struct{})
+	go func() {
+		s.wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
 }
