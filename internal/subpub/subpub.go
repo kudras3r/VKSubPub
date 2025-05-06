@@ -4,9 +4,11 @@ import (
 	"context"
 
 	"github.com/kudras3r/VKSubPub/pkg/config"
+	"github.com/kudras3r/VKSubPub/pkg/logger"
 )
 
 var conf *config.SPConf
+var log *logger.Logger
 
 // MessageHandler is a callback function that processes messages delivered to subscribers.
 type MessageHandler func(msg interface{})
@@ -36,4 +38,8 @@ func NewSubPub() SubPub {
 
 func SetConf(c *config.SPConf) {
 	conf = c
+}
+
+func SetLogger(l *logger.Logger) {
+	log = l
 }

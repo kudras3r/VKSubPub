@@ -54,18 +54,23 @@ func nilHandler(hl MessageHandler) bool {
 }
 
 func (s *subscriber) drainExtra() {
+	loc := GLOC_SP + "drainExtra()"
+
 	s.exMu.Lock()
 	defer s.exMu.Unlock()
 
 	if len(s.extra) > conf.MaxExSize {
+		log.Warnf("%s: extra slice size=%d when max=%d!", loc, len(s.extra), conf.MaxExSize)
 		// ? THINK : what we gonna do
 	}
 
 	for len(s.extra) > 0 {
+		log.Warnf("%s: have extra messages!", loc)
 		select {
 		case s.ch <- s.extra[0]:
 			s.extra = s.extra[1:]
 		default:
+			// ch is full
 			return
 		}
 	}
@@ -73,12 +78,14 @@ func (s *subscriber) drainExtra() {
 
 // Subscribe creates an asynchronous queue subscriber on the given subject.
 func (s *subPub) Subscribe(subject string, cb MessageHandler) (Subscription, error) {
-	loc := GLOC_SP + "subPub.Subscribe()"
+	loc := GLOC_SP + "Subscribe()"
 
 	if emptySubject(subject) {
+		log.Warnf("%s: emtry subject!", loc)
 		return nil, ErrEmptySubject(loc)
 	}
 	if nilHandler(cb) {
+		log.Warnf("%s: handler is nil!", loc)
 		return nil, ErrEmptyHandler(loc)
 	}
 
@@ -97,6 +104,7 @@ func (s *subPub) Subscribe(subject string, cb MessageHandler) (Subscription, err
 		extra: make([]interface{}, 0, conf.DefaultExCap),
 	}
 	s.subcrs[subject] = append(s.subcrs[subject], nsub)
+	log.Infof("%s: new sub added to subject: %s", loc, subject)
 
 	s.wg.Add(1)
 
@@ -110,6 +118,7 @@ func (s *subPub) Subscribe(subject string, cb MessageHandler) (Subscription, err
 				nsub.hl(msg) // if hl panic - goroutine will be dead
 				nsub.drainExtra()
 			case <-nsub.stop:
+				log.Infof("%s: stop sub with subject: %s", loc, subject)
 				return
 			}
 		}
@@ -123,9 +132,10 @@ func (s *subPub) Subscribe(subject string, cb MessageHandler) (Subscription, err
 }
 
 func (s *subPub) Publish(subject string, msg interface{}) error {
-	loc := GLOC_SP + "subPub.Publish()"
+	loc := GLOC_SP + "Publish()"
 
 	if emptySubject(subject) {
+		log.Warnf("%s: emtry subject!", loc)
 		return ErrEmptySubject(loc)
 	}
 
@@ -137,12 +147,15 @@ func (s *subPub) Publish(subject string, msg interface{}) error {
 		return nil
 	}
 
+	log.Infof("%s: publish { subject: %s, msg: %s }", loc, subject, msg)
+
 	for _, sub := range subs {
 		// ! TODO : Один медленный подписчик не должен тормозить остальных (+)
 		select {
 		case sub.ch <- msg:
 		default:
 			// if is full
+			log.Warnf("%s: append extra message!", loc)
 			sub.exMu.Lock()
 			sub.extra = append(sub.extra, msg)
 			sub.exMu.Unlock()
@@ -155,8 +168,7 @@ func (s *subPub) Publish(subject string, msg interface{}) error {
 func (s *subPub) Close(ctx context.Context) error {
 	loc := GLOC_SP + "Close()"
 
-	_ = loc
-
+	log.Warnf("%s: close subs", loc)
 	s.mu.Lock()
 	for _, subs := range s.subcrs {
 		for _, sub := range subs {
@@ -173,8 +185,10 @@ func (s *subPub) Close(ctx context.Context) error {
 
 	select {
 	case <-done:
+		log.Warnf("%s: close waiting for all routines!", loc)
 		return nil
 	case <-ctx.Done():
+		log.Warnf("%s: forcibly close by context!", loc)
 		return ctx.Err()
 	}
 }

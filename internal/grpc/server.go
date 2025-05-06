@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	GLOC_SRV = "internal/grpc/server.go/"
+	GLOC_SRV = "internal/grpc/server.go/" // for logging
 )
 
 type Server struct {
@@ -47,11 +47,13 @@ func (s *Server) Run() error {
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.cfg.Port))
 	if err != nil {
+		s.log.Errorf("%s: cannot start the server", loc)
 		return ErrCannotListenTcpOn(loc, s.cfg.Port, err)
 	}
-	s.log.Infof("grpc server started at :%d", s.cfg.Port)
+	s.log.Infof("%s: grpc server started at :%d", loc, s.cfg.Port)
 
 	if err := s.grpcSrv.Serve(lis); err != nil {
+		s.log.Errorf("%s: cannot serve the grpc", loc)
 		return ErrCannotServeGRPC(loc, err)
 	}
 
@@ -59,5 +61,5 @@ func (s *Server) Run() error {
 }
 
 func (s *Server) Stop() {
-
+	// ! TODO : gracefully shutdown
 }

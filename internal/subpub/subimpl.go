@@ -15,7 +15,6 @@ type subscription struct {
 
 func (s *subscription) Unsubscribe() {
 	loc := GLOC_SUB + "Unsubscribe()"
-	_ = loc
 
 	// ? THINK : O(n) is bad :(
 	s.once.Do(func() {
@@ -37,6 +36,7 @@ func (s *subscription) Unsubscribe() {
 		}
 
 		if len(s.sp.subcrs[s.subject]) == 0 {
+			log.Warnf("%s: delete subject %s!", loc, s.subject)
 			delete(s.sp.subcrs, s.subject)
 		}
 
