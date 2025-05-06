@@ -1,11 +1,15 @@
 package main
 
 import (
-	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
+	"github.com/kudras3r/VKSubPub/internal/grpc"
 	"github.com/kudras3r/VKSubPub/internal/subpub"
 	"github.com/kudras3r/VKSubPub/pkg/config"
 	"github.com/kudras3r/VKSubPub/pkg/logger"
+	// "google.golang.org/grpc"
 )
 
 func main() {
@@ -19,10 +23,21 @@ func main() {
 
 	log.Info(cfg.PrettyView())
 
-	// init app
+	// init server
+	srv := grpc.New(log, &cfg.GRPC)
 
-	// run grpc server
+	// run server
+	go func() {
+		err := srv.Run()
+		if err != nil {
+			panic(err)
+		}
+	}()
 
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+	<-stop
+
+	srv.Stop()
 	// ...
-	fmt.Println("kek")
 }

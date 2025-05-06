@@ -10,6 +10,12 @@ GENERATE_PROTO=protoc \
 
 .PHONY: proto clean
 
+RUN_APP=go build -o spapp cmd/subpub/main.go
+
+run:
+	$(RUN_APP)
+	./spapp --config=./.env
+
 proto:
 	$(GENERATE_PROTO)
 

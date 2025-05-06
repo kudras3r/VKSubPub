@@ -1,8 +1,5 @@
 package subpub
 
-// needed for testing no-export things in /tests
-// look at /tests/subpub_test.go
-
 import (
 	"sync"
 	"testing"

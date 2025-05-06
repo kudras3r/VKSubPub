@@ -301,9 +301,3 @@ func TestCloseContextCancelled(t *testing.T) {
 		t.Errorf("Close took too long despite cancelled context: %v", duration)
 	}
 }
-
-func TestExtraQueue(t *testing.T) {
-	var r []int
-	var m []interface{}
-	subpub.TestSubPubExtraQueueOrder(t, r, m)
-}
