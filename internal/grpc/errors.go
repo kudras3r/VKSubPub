@@ -10,4 +10,10 @@ var (
 	ErrCannotServeGRPC = func(loc string, err error) error {
 		return fmt.Errorf("cannot serve grpc at %s: %v", loc, err)
 	}
+
+	SErrInvalidKey = func(key string) string {
+		return fmt.Sprintf("invalid key %s", key)
+	}
+
+	SErrInvalidMsg = "message is not string!"
 )

@@ -20,17 +20,19 @@ func main() {
 	// init logger
 	log := logger.New(cfg.LogLevel)
 	_ = log
-
 	log.Info(cfg.PrettyView())
 
+	// init sp
+	sp := subpub.NewSubPub()
+
 	// init server
-	srv := grpc.New(log, &cfg.GRPC)
+	srv := grpc.New(log, &cfg.GRPC, sp)
 
 	// run server
 	go func() {
-		err := srv.Run()
-		if err != nil {
-			panic(err)
+		log.Info("running the server")
+		if err := srv.Run(); err != nil {
+			log.Panic(err)
 		}
 	}()
 
