@@ -1,6 +1,7 @@
 package grpc
 
 import (
+	"context"
 	"fmt"
 	"net"
 
@@ -60,6 +61,13 @@ func (s *Server) Run() error {
 	return nil
 }
 
-func (s *Server) Stop() {
-	// ! TODO : gracefully shutdown
+func (s *Server) Stop(ctx context.Context) {
+	loc := GLOC_SRV + "Stop()"
+
+	s.log.Infof("%s: stopping the server", loc)
+	s.grpcSrv.Stop()
+	s.log.Infof("%s: server stopped", loc)
+	s.log.Infof("%s: stopping the sp service", loc)
+	s.sp.Close(ctx)
+	s.log.Infof("%s: sp service stopped", loc)
 }

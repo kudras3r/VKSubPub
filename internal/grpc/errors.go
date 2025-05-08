@@ -15,7 +15,7 @@ var (
 		return fmt.Sprintf("invalid key %s", key)
 	}
 
-	SFailedToSendMsg      = "failed to send message!"
-	SErrFailedToSubscribe = "failed to subscribe!"
-	SErrFailedToPublish   = "failed to publish!"
+	SErrFailedToSendMsg   = "failed to send message"
+	SErrFailedToSubscribe = "failed to subscribe"
+	SErrFailedToPublish   = "failed to publish"
 )

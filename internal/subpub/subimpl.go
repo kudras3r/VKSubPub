@@ -1,6 +1,10 @@
 package subpub
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/kudras3r/VKSubPub/pkg/logger"
+)
 
 const (
 	GLOC_SUB = "internal/subpub/subimpl.go/"
@@ -11,6 +15,7 @@ type subscription struct {
 	once    sync.Once
 	sub     *subscriber
 	sp      *subPub
+	log     *logger.Logger
 }
 
 func (s *subscription) Unsubscribe() {
@@ -36,7 +41,7 @@ func (s *subscription) Unsubscribe() {
 		}
 
 		if len(s.sp.subcrs[s.subject]) == 0 {
-			log.Warnf("%s: delete subject %s!", loc, s.subject)
+			s.log.Warnf("%s: delete subject %s!", loc, s.subject)
 			delete(s.sp.subcrs, s.subject)
 		}
 

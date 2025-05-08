@@ -4,10 +4,16 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/kudras3r/VKSubPub/pkg/config"
+	"github.com/kudras3r/VKSubPub/pkg/logger"
 )
 
-func TestSubPubExtraQueueOrder(t *testing.T, received []int, msgs []interface{}) {
+func TestSubPubExtraQueueOrder(t *testing.T) {
 	var mu sync.Mutex
+
+	msgs := make([]int, 0)
+	received := make([]int, 0)
 
 	handler := func(msg interface{}) {
 		mu.Lock()
@@ -16,13 +22,18 @@ func TestSubPubExtraQueueOrder(t *testing.T, received []int, msgs []interface{})
 		time.Sleep(10 * time.Millisecond)
 	}
 
-	sp := &subPub{subcrs: make(map[string][]*subscriber)}
+	sp := NewSubPub(logger.New("debug"), &config.SPConf{
+		SubQSize:       10, // ! CHECK
+		MaxExSize:      5,
+		DefaultSubsCap: 5,
+		DefaultExCap:   5,
+	})
 	sub, err := sp.Subscribe("test", handler)
 	if err != nil {
 		t.Fatalf("Subscribe failed: %v", err)
 	}
 
-	msgsLen := conf.SubQSize + 30
+	msgsLen := 10 + 30 // ! CHECK
 	for i := 0; i < msgsLen; i++ {
 		msgs = append(msgs, i)
 	}

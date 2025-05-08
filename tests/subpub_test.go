@@ -7,10 +7,20 @@ import (
 	"time"
 
 	"github.com/kudras3r/VKSubPub/internal/subpub"
+	"github.com/kudras3r/VKSubPub/pkg/config"
+	"github.com/kudras3r/VKSubPub/pkg/logger"
 )
 
+var cfg = &config.SPConf{
+	SubQSize:       10,
+	MaxExSize:      10,
+	DefaultSubsCap: 5,
+	DefaultExCap:   5,
+}
+
 func TestSubscribeErrors(t *testing.T) {
-	sp := subpub.NewSubPub()
+	log := logger.New("debug")
+	sp := subpub.NewSubPub(log, cfg)
 
 	_, err := sp.Subscribe("", func(interface{}) {})
 	if err == nil {
@@ -24,7 +34,8 @@ func TestSubscribeErrors(t *testing.T) {
 }
 
 func TestSubscribeAndPublish(t *testing.T) {
-	sp := subpub.NewSubPub()
+	log := logger.New("debug")
+	sp := subpub.NewSubPub(log, cfg)
 
 	var msgs []interface{}
 
@@ -101,7 +112,8 @@ func TestSubscribeAndPublish(t *testing.T) {
 // }
 
 func TestConcurrentPublish(t *testing.T) {
-	sp := subpub.NewSubPub()
+	log := logger.New("debug")
+	sp := subpub.NewSubPub(log, cfg)
 	var mu sync.Mutex
 	var count int
 
@@ -135,7 +147,8 @@ func TestConcurrentPublish(t *testing.T) {
 }
 
 func TestFIFOOrder(t *testing.T) {
-	sp := subpub.NewSubPub()
+	log := logger.New("debug")
+	sp := subpub.NewSubPub(log, cfg)
 
 	var received []string
 	var mu sync.Mutex
@@ -169,7 +182,8 @@ func TestFIFOOrder(t *testing.T) {
 }
 
 func TestUnsubscribe(t *testing.T) {
-	sp := subpub.NewSubPub()
+	log := logger.New("debug")
+	sp := subpub.NewSubPub(log, cfg)
 
 	var called int
 	var mu sync.Mutex
@@ -200,7 +214,8 @@ func TestUnsubscribe(t *testing.T) {
 }
 
 func TestMultipleUnsubscribe(t *testing.T) {
-	sp := subpub.NewSubPub()
+	log := logger.New("debug")
+	sp := subpub.NewSubPub(log, cfg)
 
 	var mu sync.Mutex
 	called := 0
@@ -233,7 +248,8 @@ func TestMultipleUnsubscribe(t *testing.T) {
 }
 
 func TestCloseGraceful(t *testing.T) {
-	sp := subpub.NewSubPub()
+	log := logger.New("debug")
+	sp := subpub.NewSubPub(log, cfg)
 
 	var mu sync.Mutex
 	called := 0
@@ -270,7 +286,8 @@ func TestCloseGraceful(t *testing.T) {
 }
 
 func TestCloseContextCancelled(t *testing.T) {
-	sp := subpub.NewSubPub()
+	log := logger.New("debug")
+	sp := subpub.NewSubPub(log, cfg)
 
 	blocker := make(chan struct{})
 

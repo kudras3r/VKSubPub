@@ -49,7 +49,7 @@ func (s *Server) Subscribe(
 			if err := st.Send(&pb.Event{Data: m}); err != nil {
 				s.log.Errorf("%s: failed to send message: %v", loc, err)
 				s.log.Infof("%s: client unsubscribed from key=%s", loc, key)
-				return status.Error(codes.Internal, SFailedToSendMsg)
+				return status.Error(codes.Internal, SErrFailedToSendMsg)
 			}
 		}
 	}

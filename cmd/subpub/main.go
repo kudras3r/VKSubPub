@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/kudras3r/VKSubPub/internal/grpc"
 	"github.com/kudras3r/VKSubPub/internal/subpub"
@@ -20,9 +22,7 @@ func main() {
 	log.Info(cfg.PrettyView())
 
 	// init sp
-	sp := subpub.NewSubPub()
-	subpub.SetConf(&cfg.SubPub)
-	subpub.SetLogger(log)
+	sp := subpub.NewSubPub(log, &cfg.SubPub)
 
 	// init server
 	srv := grpc.New(log, &cfg.GRPC, sp)
@@ -35,9 +35,16 @@ func main() {
 		}
 	}()
 
+	// stop server
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 	<-stop
 
-	srv.Stop()
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		time.Duration(cfg.GRPC.Timeout)*time.Second,
+	)
+
+	defer cancel()
+	srv.Stop(ctx)
 }
