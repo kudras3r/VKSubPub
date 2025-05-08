@@ -133,6 +133,7 @@ func (s *subPub) Subscribe(subject string, cb MessageHandler) (Subscription, err
 		subject: subject,
 		sub:     nsub,
 		sp:      s,
+		log:     s.log,
 	}, nil
 }
 
@@ -170,15 +171,6 @@ func (s *subPub) Publish(subject string, msg interface{}) error {
 // May be blocked by data delivery until the context is canceled.
 func (s *subPub) Close(ctx context.Context) error {
 	loc := GLOC_SP + "Close()"
-
-	s.log.Warnf("%s: close subs", loc)
-	s.mu.Lock()
-	for _, subs := range s.subcrs {
-		for _, sub := range subs {
-			close(sub.stop)
-		}
-	}
-	s.mu.Unlock()
 
 	done := make(chan struct{})
 	go func() {

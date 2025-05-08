@@ -10,11 +10,15 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const (
+	GLOC_HLS = "internal/grpc/handlers.go/" // for logging
+)
+
 func (s *Server) Subscribe(
 	r *pb.SubscribeRequest,
 	st grpc.ServerStreamingServer[pb.Event],
 ) error {
-	loc := GLOC_SRV + "Subscribe()"
+	loc := GLOC_HLS + "Subscribe()"
 
 	ctx := st.Context()
 	msgCh := make(chan string) // ? THINK buff or no
