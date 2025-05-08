@@ -21,39 +21,33 @@ func (s *Server) Subscribe(
 	loc := GLOC_HLS + "Subscribe()"
 
 	ctx := st.Context()
-	msgCh := make(chan string) // ? THINK buff or no
+	msgsCh := make(chan string, s.cfg.MsgsChSize)
+	defer close(msgsCh)
 
 	key := r.GetKey()
 	s.log.Infof("%s: trying to subscribe at %s", loc, key)
 
-	sub, err := s.sp.Subscribe(key, func(msg interface{}) {
-		if _, ok := msg.(string); ok {
-			select {
-			case msgCh <- msg.(string):
-			case <-ctx.Done():
-				// client leave
-			}
-		} else {
-			s.log.Errorf("%s: received non-string message: %T", loc, msg)
-		}
-	})
+	sub, err := s.spService.Subscribe(ctx, key, msgsCh)
 	if err != nil {
-		s.log.Errorf("%s: failed to subscribe on key=%s: %v", loc, key, err)
-		return status.Error(codes.Internal, SErrFailedToSubscribe)
+		s.log.Errorf("%s: failed to subscribe", loc)
+		return status.Error(codes.Internal, err.Error())
 	}
-	defer sub.Unsubscribe()
+	defer func() {
+		sub.Unsubscribe()
+		s.log.Infof("%s: trying to unsubscribe from key=%s", loc, key)
+	}()
 
 	for {
 		select {
 		case <-ctx.Done():
 			s.log.Infof("%s: client unsubscribed from key=%s", loc, key)
-			return ctx.Err()
+			return status.Error(codes.Internal, ctx.Err().Error())
 
-		case m := <-msgCh:
+		case m := <-msgsCh:
 			if err := st.Send(&pb.Event{Data: m}); err != nil {
 				s.log.Errorf("%s: failed to send message: %v", loc, err)
 				s.log.Infof("%s: client unsubscribed from key=%s", loc, key)
-				return status.Error(codes.Internal, SErrFailedToSendMsg)
+				return status.Error(codes.Internal, SErrFailedToSendMsg(m))
 			}
 		}
 	}
@@ -67,10 +61,10 @@ func (s *Server) Publish(
 	data, key := r.GetData(), r.GetKey()
 	s.log.Infof("%s: trying to publish { data: %s, key: %s }", loc, data, key)
 
-	err := s.sp.Publish(key, data)
+	err := s.spService.Publish(data, key)
 	if err != nil {
 		s.log.Errorf("%s: failed to publish", loc)
-		return &empty.Empty{}, status.Error(codes.Internal, SErrFailedToPublish)
+		return &empty.Empty{}, status.Error(codes.Internal, err.Error())
 	}
 
 	return &empty.Empty{}, nil

@@ -46,5 +46,7 @@ func (s *subscription) Unsubscribe() {
 		}
 
 		close(s.sub.stop)
+
+		s.log.Infof("%s: unsubscribed from subject=%s", loc, s.subject)
 	})
 }

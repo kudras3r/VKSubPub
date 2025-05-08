@@ -139,9 +139,10 @@ func (s *subPub) Subscribe(subject string, cb MessageHandler) (Subscription, err
 
 // Publish publishes the msg argument to the given subject.
 func (s *subPub) Publish(subject string, msg interface{}) error {
-	loc := GLOC_SP + "subPub.Publish()"
+	loc := GLOC_SP + "Publish()"
 
 	if emptySubject(subject) {
+		s.log.Warnf("%s: empty subject!", loc)
 		return ErrEmptySubject(loc)
 	}
 
@@ -150,6 +151,7 @@ func (s *subPub) Publish(subject string, msg interface{}) error {
 
 	subs, ok := s.subcrs[subject]
 	if !ok {
+		s.log.Warnf("%s: no subscribers for subject %s!", loc, subject)
 		return nil
 	}
 

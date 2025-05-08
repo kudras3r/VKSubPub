@@ -8,7 +8,8 @@ import (
 	"time"
 
 	"github.com/kudras3r/VKSubPub/internal/grpc"
-	"github.com/kudras3r/VKSubPub/internal/subpub"
+	"github.com/kudras3r/VKSubPub/internal/service"
+
 	"github.com/kudras3r/VKSubPub/pkg/config"
 	"github.com/kudras3r/VKSubPub/pkg/logger"
 )
@@ -21,11 +22,11 @@ func main() {
 	log := logger.New(cfg.LogLevel)
 	log.Info(cfg.PrettyView())
 
-	// init sp
-	sp := subpub.NewSubPub(log, &cfg.SubPub)
+	// init sp service
+	sps := service.NewSPService(log, &cfg.SubPub)
 
 	// init server
-	srv := grpc.New(log, &cfg.GRPC, sp)
+	srv := grpc.New(log, &cfg.GRPC, sps)
 
 	// run server
 	go func() {
@@ -47,4 +48,6 @@ func main() {
 
 	defer cancel()
 	srv.Stop(ctx)
+
+	log.Info("gracefully stopped :)")
 }

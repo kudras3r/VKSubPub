@@ -37,6 +37,7 @@ SP_DEF_EXTRA_CAP=16 # default capacity for the extra buffer
 # grpc
 GRPC_PORT=44044
 GRPC_TIMEOUT=10 # seconds
+GRPC_MSGS_CH_SIZE=32 # server size chan for msgs size
 ```
 
 2. **Initialize Logger**: The logger (based on Logrus) is initialized and passed as a field (`*logger.Logger`) to all relevant structs.

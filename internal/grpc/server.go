@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net"
 
-	// "github.com/kudras3r/VKSubPub/internal/services/subpub"
-	"github.com/kudras3r/VKSubPub/internal/subpub"
+	// "github.com/kudras3r/VKSubPub/internal/subpub"
+	"github.com/kudras3r/VKSubPub/internal/service"
 	"github.com/kudras3r/VKSubPub/pkg/config"
 	"github.com/kudras3r/VKSubPub/pkg/logger"
 	pb "github.com/kudras3r/VKSubPub/proto/vk_sp"
@@ -23,21 +23,22 @@ type Server struct {
 	cfg     *config.GRPCConf
 	grpcSrv *grpc.Server
 	log     *logger.Logger
-	// spService *subpub.SPService
 
-	sp subpub.SubPub
+	spService *service.SPService
+
+	// sp subpub.SubPub
 }
 
 func New(
-	// log *logger.Logger, cfg *config.GRPCConf, sps *subpub.SPService,
-	log *logger.Logger, cfg *config.GRPCConf, sp subpub.SubPub,
+	log *logger.Logger, cfg *config.GRPCConf, sps *service.SPService,
+	// log *logger.Logger, cfg *config.GRPCConf, sp subpub.SubPub,
 ) *Server {
 	grpcSrv := grpc.NewServer()
 	srv := &Server{
-		cfg:     cfg,
-		log:     log,
-		grpcSrv: grpcSrv,
-		sp:      sp,
+		cfg:       cfg,
+		log:       log,
+		grpcSrv:   grpcSrv,
+		spService: sps,
 	}
 	pb.RegisterPubSubServer(grpcSrv, srv)
 	return srv
@@ -67,7 +68,6 @@ func (s *Server) Stop(ctx context.Context) {
 	s.log.Infof("%s: stopping the server", loc)
 	s.grpcSrv.Stop()
 	s.log.Infof("%s: server stopped", loc)
-	s.log.Infof("%s: stopping the sp service", loc)
-	s.sp.Close(ctx)
-	s.log.Infof("%s: sp service stopped", loc)
+
+	s.spService.Close(ctx)
 }

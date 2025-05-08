@@ -23,27 +23,30 @@ type SPConf struct {
 }
 
 type GRPCConf struct {
-	Port    int `env:"GRPC_PORT"`
-	Timeout int `env:"GRPC_TIMEOUT"`
+	Port       int `env:"GRPC_PORT"`
+	Timeout    int `env:"GRPC_TIMEOUT"`
+	MsgsChSize int `env:"GRPC_MSGS_CH_SIZE"`
 }
 
 func (c *Config) PrettyView() string {
 	return fmt.Sprintf("\n"+`Config {
     LogLevel: %s
     GRPC: {
-        Port: %d
-        Timeout: %d
+        Port:           %d
+        Timeout:        %d
+	MsgsChSize:     %d
     }
     SubPub: {
-        SubQSize: %d
-        MaxExSize: %d
+        SubQSize:       %d
+        MaxExSize:      %d
         DefaultSubsCap: %d
-        DefaultExCap: %d
+        DefaultExCap:   %d
     }
 }`,
 		c.LogLevel,
 		c.GRPC.Port,
 		c.GRPC.Timeout,
+		c.GRPC.MsgsChSize,
 		c.SubPub.SubQSize,
 		c.SubPub.MaxExSize,
 		c.SubPub.DefaultSubsCap,
