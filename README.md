@@ -8,6 +8,49 @@ This is a publisher-subscriber message worker implemented as a gRPC service.
 
 VKSubPub is a gRPC-based service that implements a publisher-subscriber messaging system. It allows clients to publish messages to specific subjects and enables other clients to subscribe to those subjects to receive messages asynchronously. 
 
+## Installation
+
+```bash
+git clone https://github.com/kudras3r/VKSubPub.git
+cd VKSubPub/
+```
+
+### Docker
+
+Create .env file where you want:
+```env
+LOG_LEVEL=DEBUG
+
+# subpub package
+SP_SUBQ_SIZE=8
+SP_MAX_EXTRA_SIZE=4096
+SP_DEF_SUBS_CAP=64
+SP_DEF_EXTRA_CAP=16
+
+# grpc
+GRPC_PORT=44044
+GRPC_TIMEOUT=10 # secs
+GRPC_MSGS_CH_SIZE=32
+```
+```bash
+docker build -t vkspapp .
+docker run -p 44044:44044 -v /PATH/TO/YOUR/.env:/app/.env -e CONFIG=/app/.env vkspapp
+```
+Or
+```bash
+docker run -p 44044:44044 -v /PATH/TO/YOUR/.env:/app/.env vkspapp --config=/app/.env
+```
+
+### Manually
+
+```bash
+go run cmd/subpub/main.go --config=/PATH/TO/YOUR/.env
+```
+Or
+```bash
+CONFIG=/PATH/TO/YOUR/.env go run cmd/subpub/main.go
+```
+
 ### Key Features:
 - **Publish-Subscribe Model**: Messages are categorized by subjects, and subscribers receive messages for the subjects they are subscribed to.
 - **Asynchronous Communication**: Subscribers process messages asynchronously, ensuring non-blocking operations and maintaining FIFO order.

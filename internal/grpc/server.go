@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 
-	// "github.com/kudras3r/VKSubPub/internal/subpub"
 	"github.com/kudras3r/VKSubPub/internal/service"
 	"github.com/kudras3r/VKSubPub/pkg/config"
 	"github.com/kudras3r/VKSubPub/pkg/logger"
@@ -25,13 +24,10 @@ type Server struct {
 	log     *logger.Logger
 
 	spService *service.SPService
-
-	// sp subpub.SubPub
 }
 
 func New(
 	log *logger.Logger, cfg *config.GRPCConf, sps *service.SPService,
-	// log *logger.Logger, cfg *config.GRPCConf, sp subpub.SubPub,
 ) *Server {
 	grpcSrv := grpc.NewServer()
 	srv := &Server{
