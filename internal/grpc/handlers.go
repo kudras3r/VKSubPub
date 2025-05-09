@@ -33,8 +33,8 @@ func (s *Server) Subscribe(
 		return status.Error(codes.Internal, err.Error())
 	}
 	defer func() {
-		sub.Unsubscribe()
 		s.log.Infof("%s: trying to unsubscribe from key=%s", loc, key)
+		sub.Unsubscribe()
 	}()
 
 	for {

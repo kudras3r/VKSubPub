@@ -28,7 +28,7 @@ func NewSPService(
 }
 
 func keyIsValid(key string) bool {
-	// ? THINK
+	// ? THINK : blogic validation
 	return true
 }
 
@@ -36,8 +36,6 @@ func (s SPService) Subscribe(
 	ctx context.Context, key string, msgsCh chan string,
 ) (subpub.Subscription, error) {
 	loc := GLOC_SPSER + "Subscribe()"
-
-	s.log.Infof("%s: trying to subscribe at %s", loc, key)
 
 	if !keyIsValid(key) {
 		s.log.Errorf("%s: invalid key=%s", loc, key)
@@ -59,6 +57,8 @@ func (s SPService) Subscribe(
 		s.log.Errorf("%s: failed to subscribe on key=%s: %v", loc, key, err)
 		return nil, ErrFailedToSubscribe(key)
 	}
+
+	s.log.Infof("%s: subscribed at %s", loc, key)
 
 	return sub, nil
 }
