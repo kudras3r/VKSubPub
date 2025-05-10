@@ -61,7 +61,7 @@ func (s *Server) Run() error {
 func (s *Server) Stop(ctx context.Context) {
 	loc := GLOC_SRV + "Stop()"
 
-	s.log.Infof("%s: stopping the server", loc)
+	s.log.Debugf("%s: stopping the server", loc)
 	s.grpcSrv.Stop()
 	s.log.Infof("%s: server stopped", loc)
 

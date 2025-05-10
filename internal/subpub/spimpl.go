@@ -123,7 +123,7 @@ func (s *subPub) Subscribe(subject string, cb MessageHandler) (Subscription, err
 				nsub.hl(msg) // if hl panic - goroutine will be dead
 				nsub.drainExtra(s.cfg.MaxExSize)
 			case <-nsub.stop:
-				s.log.Infof("%s: stop sub with subject: %s", loc, subject)
+				s.log.Debugf("%s: stop sub with subject: %s", loc, subject)
 				return
 			}
 		}

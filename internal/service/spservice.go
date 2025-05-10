@@ -29,6 +29,7 @@ func NewSPService(
 
 func keyIsValid(key string) bool {
 	// ? THINK : blogic validation
+	_ = key
 	return true
 }
 
@@ -84,7 +85,7 @@ func (s *SPService) Publish(data, key string) error {
 func (s *SPService) Close(ctx context.Context) error {
 	loc := GLOC_SPSER + "Close()"
 
-	s.log.Infof("%s: closing sub-pub service", loc)
+	s.log.Debugf("%s: closing sub-pub service", loc)
 	if err := s.sp.Close(ctx); err != nil {
 		s.log.Errorf("%s: failed to close sub-pub service: %v", loc, err)
 		return err

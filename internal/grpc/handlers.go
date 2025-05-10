@@ -25,7 +25,7 @@ func (s *Server) Subscribe(
 	defer close(msgsCh)
 
 	key := r.GetKey()
-	s.log.Infof("%s: trying to subscribe at %s", loc, key)
+	s.log.Debugf("%s: trying to subscribe at %s", loc, key)
 
 	sub, err := s.spService.Subscribe(ctx, key, msgsCh)
 	if err != nil {
@@ -33,7 +33,7 @@ func (s *Server) Subscribe(
 		return status.Error(codes.Internal, err.Error())
 	}
 	defer func() {
-		s.log.Infof("%s: trying to unsubscribe from key=%s", loc, key)
+		s.log.Debugf("%s: trying to unsubscribe from key=%s", loc, key)
 		sub.Unsubscribe()
 	}()
 
@@ -59,7 +59,7 @@ func (s *Server) Publish(
 	loc := GLOC_SRV + "Publish()"
 
 	data, key := r.GetData(), r.GetKey()
-	s.log.Infof("%s: trying to publish { data: %s, key: %s }", loc, data, key)
+	s.log.Debugf("%s: trying to publish { data: %s, key: %s }", loc, data, key)
 
 	err := s.spService.Publish(data, key)
 	if err != nil {

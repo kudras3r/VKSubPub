@@ -18,6 +18,7 @@ type subscription struct {
 	log     *logger.Logger
 }
 
+// Unsubscribe will remove interest in the current subject subscription is for.
 func (s *subscription) Unsubscribe() {
 	loc := GLOC_SUB + "Unsubscribe()"
 
