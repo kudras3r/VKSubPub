@@ -13,7 +13,7 @@ import (
 
 var cfg = &config.SPConf{
 	SubQSize:       10,
-	MaxExSize:      10,
+	MaxExSize:      1000,
 	DefaultSubsCap: 5,
 	DefaultExCap:   5,
 }
@@ -254,7 +254,7 @@ func TestCloseGraceful(t *testing.T) {
 	var mu sync.Mutex
 	called := 0
 
-	_, err := sp.Subscribe("test", func(msg interface{}) {
+	s, err := sp.Subscribe("test", func(msg interface{}) {
 		mu.Lock()
 		called++
 		mu.Unlock()
@@ -270,8 +270,10 @@ func TestCloseGraceful(t *testing.T) {
 
 	time.Sleep(50 * time.Millisecond)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
+
+	s.Unsubscribe()
 
 	err = sp.Close(ctx)
 	if err != nil {

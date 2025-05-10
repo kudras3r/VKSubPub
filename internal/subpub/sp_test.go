@@ -1,6 +1,7 @@
 package subpub
 
 import (
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -24,7 +25,7 @@ func TestSubPubExtraQueueOrder(t *testing.T) {
 
 	sp := NewSubPub(logger.New("debug"), &config.SPConf{
 		SubQSize:       10, // ! CHECK
-		MaxExSize:      5,
+		MaxExSize:      1000,
 		DefaultSubsCap: 5,
 		DefaultExCap:   5,
 	})
@@ -54,6 +55,8 @@ func TestSubPubExtraQueueOrder(t *testing.T) {
 		t.Fatalf("Expected %d messages, got %d", len(msgs), len(received))
 	}
 
+	fmt.Println(received)
+	fmt.Println(msgs)
 	for i := range msgs {
 		if received[i] != msgs[i] {
 			t.Errorf("At index %d, expected %d, got %d", i, msgs[i], received[i])

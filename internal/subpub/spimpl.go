@@ -65,7 +65,7 @@ func (s *subscriber) drainExtra(maxExSize int) {
 	defer s.exMu.Unlock()
 
 	if len(s.extra) > maxExSize {
-		s.log.Warnf("%s: extra slice size=%d when max=%d!", loc, len(s.extra), maxExSize)
+		s.log.Errorf("%s: extra slice size=%d when max=%d!", loc, len(s.extra), maxExSize)
 		// ? THINK : what we gonna do
 	}
 
@@ -105,6 +105,7 @@ func (s *subPub) Subscribe(subject string, cb MessageHandler) (Subscription, err
 		ch:   make(chan interface{}, s.cfg.SubQSize),
 		hl:   cb,
 		stop: make(chan struct{}),
+		log:  s.log,
 
 		extra: make([]interface{}, 0, s.cfg.DefaultExCap),
 	}
@@ -156,6 +157,11 @@ func (s *subPub) Publish(subject string, msg interface{}) error {
 	}
 
 	for _, sub := range subs {
+		if len(sub.extra) > 0 {
+			sub.extra = append(sub.extra, msg)
+			continue
+		}
+
 		select {
 		case sub.ch <- msg:
 		default:
@@ -176,7 +182,9 @@ func (s *subPub) Close(ctx context.Context) error {
 
 	done := make(chan struct{})
 	go func() {
+		s.log.Infof("%s: waiting for all routines to finish", loc)
 		s.wg.Wait()
+		s.log.Infof("%s: all routines finished", loc)
 		close(done)
 	}()
 
